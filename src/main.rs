@@ -93,8 +93,6 @@ fn proton_caller(args: Vec<String>) -> Result<(), Error> {
             args: Vec::new(),
         };
 
-        dbg!(&args.data_path);
-
         let (options, argv) = if parser.contains(["-o", "--options"]) {
             let mut opts: Vec<RuntimeOption> = Vec::new();
 
