@@ -49,6 +49,7 @@ struct Args {
     options: Vec<RuntimeOption>,
     args: Vec<String>,
     runtime_version: Option<RunTimeVersion>,
+    data_path: Option<PathBuf>,
 }
 
 /// Main function which purely handles errors
@@ -87,9 +88,12 @@ fn proton_caller(args: Vec<String>) -> Result<(), Error> {
             version: parser.option_arg(["-p", "--proton"]).unwrap_or_default(),
             custom: parser.option_arg(["-c", "--custom"]),
             runtime_version: parser.option_arg::<RunTimeVersion, [&str; 2]>(["-R", "--runtime"]),
+            data_path: parser.option_arg(["-d", "--data"]),
             options: Vec::new(),
             args: Vec::new(),
         };
+
+        dbg!(&args.data_path);
 
         let (options, argv) = if parser.contains(["-o", "--options"]) {
             let mut opts: Vec<RuntimeOption> = Vec::new();
@@ -174,7 +178,7 @@ fn normal_mode(config: &Config, args: Args) -> Result<Proton, Error> {
         args.program,
         args.args,
         args.options,
-        config.data(),
+        if args.data_path.is_none() { config.data() } else { args.data_path.unwrap() },
         config.steam(),
         args.runtime_version,
         config.common(),
@@ -192,7 +196,7 @@ fn custom_mode(config: &Config, args: Args) -> Result<Proton, Error> {
             args.program,
             args.args,
             args.options,
-            config.data(),
+            if args.data_path.is_none() { config.data() } else { args.data_path.unwrap() },
             config.steam(),
             args.runtime_version,
             config.common(),
@@ -214,6 +218,7 @@ Options:
     -i, --index             View an index of installed Proton versions
     -l, --log               Pass PROTON_LOG variable to Proton
     -o, --options [OPTIONS] Pass options to Runtime
+    -d, --data [PATH]       Use custom data path, ignoring the one in the config
     -p, --proton [VERSION]  Use Proton VERSION from `common`
     -r, --run EXE           Run EXE in proton
     -R, --runtime [VERSION] Use runtime VERSION
